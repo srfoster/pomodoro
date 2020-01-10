@@ -1,0 +1,93 @@
+<html><head><link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" /><meta charset="utf-8" /></head><body><script src="/js/jquery-3.4.1.min.js"></script><script src="/js/moment.min.js"></script><script>
+//<![CDATA[
+   function replaceAllText(root, find, replace) {
+
+       var walker = document.createTreeWalker(
+           root,
+           NodeFilter.SHOW_ALL,  // filtering only text nodes
+           null,
+           false
+       );
+
+       while (walker.nextNode()) {
+           var c = walker.currentNode
+           if(c.id){
+             c.id = c.id.replace(find, replace)
+           }
+           if(c.getAttribute && c.getAttribute('onclick')){
+             c.setAttribute('onclick', c.getAttribute('onclick').replace(find, replace))
+           }
+           if(c.tagName == "SCRIPT"){
+             c.textContent = c.textContent.replace(find, replace)
+           }
+
+           if(c.tagName == "TEMPLATE"){
+             var content = c.content
+             console.log(content)
+             replaceAllText(content, find, replace)
+           }
+       }
+   }
+
+function newNamespaceKeeping(old){
+   var cache = {}
+   return function(ns){
+     if(!cache[ns] && ns != old){
+       //Keep a cache.  And avoid changing the oldNamespace...
+       window.namespace_num = window.namespace_num || 0
+       window.namespace_num += 1
+       var freshNamespace = ns + "0000" + window.namespace_num
+       cache[ns] = freshNamespace
+     }
+
+     return cache[ns] || ns;
+   }
+}
+
+function getNamespace(component){
+  return component.innerHTML.match(/ns\d+/)[0]
+}
+
+function injectComponent(template, target, oldNamespace){
+       console.log([template, target, oldNamespace])
+       var actualTemplate = null;
+       if(typeof(template) == "string")
+           actualTemplate = document.getElementById(template);
+       else
+           actualTemplate = template;
+
+       var s = actualTemplate.innerHTML
+
+       var content = actualTemplate.content
+       var clonedContent = document.importNode(content, true)
+       replaceAllText(clonedContent, /ns\d+/g, newNamespaceKeeping(oldNamespace))
+
+       document.getElementById(target).appendChild(clonedContent)
+
+       window.injected = document.getElementById(target).lastChild
+       if (actualTemplate.afterInject)
+          actualTemplate.afterInject(window.injected)
+}
+//]]>
+</script><script src="/js/p5.min.js"></script><div class="accordion" id="ns1356_main"><div class="card"><div class="card-header"><button type="button" class="btn btn-link" onClick="window.ns1355_toggle()"><p>Click to see!</p></button></div><div id="ns1355_collapse1" class="collapse "><div class="card-body"><p>Now you see!</p><p>Click again to hide!</p></div></div></div><script>
+//<![CDATA[
+window.ns1355_toggle = function(){
+$("#"+ window.ns1355_toToggle ).toggle();
+
+
+}
+
+window.ns1355_toToggle="ns1355_collapse1";
+
+//]]>
+</script></div><script>
+//<![CDATA[
+
+//]]>
+</script><script src="/js/bootstrap.bundle.min.js"></script><script>
+//<![CDATA[
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+//]]>
+</script><script src="/js/font-awesome.js"></script></body></html>
