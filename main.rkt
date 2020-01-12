@@ -10,6 +10,7 @@
   done
   incomplete
   complete
+  tagged-with?
   task-complete?
   tag-filter
   tag-filter-not
@@ -54,14 +55,15 @@
   (filter (curry task-complete? #:pomos (flatten pomos))
           (flatten l)))
 
+(define (tagged-with? t tag)
+  (member tag (task-tags t)))
+
 (define (tag-filter l tag)
-  (filter (lambda (t)
-            (member tag (task-tags t))) 
+  (filter (curryr tagged-with? tag)
           (flatten l)))
 
 (define (tag-filter-not l tag)
-  (filter-not (lambda (t)
-                (member tag (task-tags t))) 
+  (filter-not (curryr tagged-with? tag) 
               (flatten l)))
 
 
