@@ -1,6 +1,7 @@
 #lang at-exp racket
 
 (provide task-calendar
+         task-calendars
          schedule
          (struct-out scheduled)
          overlaps-with?)
@@ -13,6 +14,13 @@
   gregor)
 
 (struct scheduled (task start duration renderer data) #:transparent)
+
+(define (event->month s)
+  (define start (scheduled-start s))
+
+  (date (->year start)
+        (->month start))
+)
 
 (define (overlaps-with? m s)
   (define start (scheduled-start s))
@@ -53,6 +61,7 @@
            (modal-dialog
             (modal-content
              (modal-body
+              (h1 name) 
               data
               (hr)
               (scheduled-data s))))))
@@ -80,24 +89,21 @@
   ret)
 
 
-(define (task-calendar events pomos)
-  (define incomplete-tasks 
-    (incomplete 
-       (map scheduled-task events) 
-       #:pomos pomos))
-
-  (define incomplete-events
-    (filter 
-      (lambda (e)
-        (member (scheduled-task e) incomplete-tasks eq?))
-      events)) 
+(define (task-calendar events)
+  (define the-month
+    (event->month (first events)))
 
   (list
-   (calendar (date 2020 1)  ;January
-             (events->hash incomplete-events)))
-  )
+   (calendar the-month
+             (events->hash events))))
 
 
+(define (task-calendars events)
+  (define by-month
+    (group-by 
+      event->month
+      events)) 
 
+  (map task-calendar by-month))
 
 
